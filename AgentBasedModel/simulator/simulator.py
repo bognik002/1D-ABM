@@ -150,14 +150,16 @@ class SimulatorInfo:
 
         return [Fundamentalist.evaluate(divs[i:i+access], r) for i in range(n)]
 
-    def stock_returns(self) -> list:
+    def stock_returns(self, roll: int = None) -> list or float:
         p = self.prices
         div = self.dividends
-        return [(p[i+1] - p[i]) / p[i] + div[i] / p[i] for i in range(len(p) - 1)]
+        r = [(p[i+1] - p[i]) / p[i] + div[i] / p[i] for i in range(len(p) - 1)]
+        return rolling(r, roll) if roll is not None else mean(r)
 
-    def abnormal_returns(self) -> list:
+    def abnormal_returns(self, roll: int = None) -> list:
         rf = self.exchange.risk_free
-        return [r - rf for r in self.stock_returns()]
+        r = [r - rf for r in self.stock_returns()]
+        return rolling(r, roll) if roll is not None else r
 
     def return_volatility(self, window: int = None) -> list or float:
         if window is None:
@@ -170,20 +172,9 @@ class SimulatorInfo:
             return std(self.prices)
         return [std(self.prices[i:i+window]) for i in range(len(self.prices) - window)]
 
-    def sharpe_ratio(self, window: int = None) -> list or float:
-        if window is None:
-            return mean(self.abnormal_returns()) / self.return_volatility()
-        ab_returns = rolling(self.abnormal_returns(), window)
-        volatility = self.return_volatility(window)
-        return [ab_returns[i] / volatility[i] for i in range(len(ab_returns))]
-
-    def arbitrage(self, access: int = 1, window: int = None) -> list or float:
-        if window is None:
-            market = self.prices
-            fundamental = self.fundamental_value(access)
-            n = len(market)
-            return mean([abs(market[i] - fundamental[i]) / market[i] for i in range(n)])
-        market = rolling(self.prices, window)
-        fundamental = rolling(self.fundamental_value(access), window)
-        n = len(market)
-        return [abs(market[i] - fundamental[i]) / market[i] for i in range(n)]
+    def liquidity(self, roll: int = None) -> list or float:
+        n = len(self.prices)
+        spreads = [el['ask'] - el['bid'] for el in self.spreads]
+        prices = self.prices
+        liq = [spreads[i] / prices[i] for i in range(n)]
+        return rolling(liq, roll) if roll is not None else mean(liq)

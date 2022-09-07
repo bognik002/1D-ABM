@@ -1,12 +1,11 @@
 from AgentBasedModel import *
-import matplotlib.pyplot as plt
 
 
 exchange = ExchangeAgent(volume=1000)
 simulator = Simulator(**{
     'exchange': exchange,
     'traders': [Fundamentalist(exchange, 10**3) for _ in range(20)],
-    'events': [MarketMakerIn(0)]
+    'events': [MarketMakerIn(0), MarketPriceShock(250, 500)]
 })
 info = simulator.info
 
