@@ -2,6 +2,7 @@ from math import exp
 
 
 def mean(x: list) -> float:
+
     return sum(x) / len(x)
 
 
@@ -16,7 +17,7 @@ def std(x: list) -> float:
 
 def rolling(x: list, n) -> list:
     if None not in x:
-        return [mean(x[i:i+n]) for i in range(len(x) - n)]
+        return [mean(x[i:i+n]) for i in range(len(x) - n + 1)]
     else:
         res = list()
         for i in range(len(x) - n):

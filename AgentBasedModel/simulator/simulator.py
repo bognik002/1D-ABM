@@ -154,18 +154,18 @@ class SimulatorInfo:
         p = self.prices
         div = self.dividends
         r = [(p[i+1] - p[i]) / p[i] + div[i] / p[i] for i in range(len(p) - 1)]
-        return rolling(r, roll) if roll is not None else mean(r)
+        return rolling(r, roll) if roll else mean(r)
 
     def abnormal_returns(self, roll: int = None) -> list:
         rf = self.exchange.risk_free
         r = [r - rf for r in self.stock_returns()]
-        return rolling(r, roll) if roll is not None else r
+        return rolling(r, roll) if roll else r
 
     def return_volatility(self, window: int = None) -> list or float:
         if window is None:
             return std(self.stock_returns())
-        n = len(self.stock_returns())
-        return [std(self.stock_returns()[i:i+window]) for i in range(n - window)]
+        n = len(self.stock_returns(1))
+        return [std(self.stock_returns(1)[i:i+window]) for i in range(n - window)]
 
     def price_volatility(self, window: int = None) -> list or float:
         if window is None:
@@ -177,4 +177,4 @@ class SimulatorInfo:
         spreads = [el['ask'] - el['bid'] for el in self.spreads]
         prices = self.prices
         liq = [spreads[i] / prices[i] for i in range(n)]
-        return rolling(liq, roll) if roll is not None else mean(liq)
+        return rolling(liq, roll) if roll else mean(liq)

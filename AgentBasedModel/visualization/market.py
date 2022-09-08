@@ -28,10 +28,10 @@ def plot_price_fundamental(info: SimulatorInfo, spread=False, access: int = 1, r
     if spread:
         v1 = [el['bid'] for el in info.spreads]
         v2 = [el['ask'] for el in info.spreads]
-        plt.plot(range(rolling, len(v1)), math.rolling(v1, rolling), label='bid', color='green')
-        plt.plot(range(rolling, len(v2)), math.rolling(v2, rolling), label='ask', color='red')
-    plt.plot(range(rolling, len(info.prices)), math.rolling(info.prices, rolling), label='market value', color='black')
-    plt.plot(range(rolling, len(info.prices)), math.rolling(info.fundamental_value(access), rolling),
+        plt.plot(range(rolling - 1, len(v1)), math.rolling(v1, rolling), label='bid', color='green')
+        plt.plot(range(rolling - 1, len(v2)), math.rolling(v2, rolling), label='ask', color='red')
+    plt.plot(range(rolling - 1, len(info.prices)), math.rolling(info.prices, rolling), label='market value', color='black')
+    plt.plot(range(rolling - 1, len(info.prices)), math.rolling(info.fundamental_value(access), rolling),
              label='fundamental value')
     plt.legend()
     plt.show()

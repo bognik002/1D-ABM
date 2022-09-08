@@ -43,13 +43,13 @@ class ExchangeAgent:
         Fill order book with random orders. Fill dividend book with n future dividends.
         """
         # Order book
-        prices1 = [round(random.normalvariate(price - std, std), 1) for _ in range(volume // 2)]
-        prices2 = [round(random.normalvariate(price + std, std), 1) for _ in range(volume // 2)]
-        quantities = [random.randint(1, 10) for _ in range(volume)]
+        prices1 = [random.normalvariate(price - std, std) for _ in range(volume // 2)]
+        prices2 = [random.normalvariate(price + std, std) for _ in range(volume // 2)]
+        quantities = [random.randint(1, 5) for _ in range(volume)]
 
         for (p, q) in zip(sorted(prices1 + prices2), quantities):
             if p > price:
-                order = Order(p, q, 'ask', None)
+                order = Order(round(p, 1), q, 'ask', None)
                 self.order_book['ask'].append(order)
             else:
                 order = Order(p, q, 'bid', None)
