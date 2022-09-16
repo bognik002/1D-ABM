@@ -77,18 +77,20 @@ class InformationShock(Event):
 
 
 class MarketMakerIn(Event):
-    def __init__(self, it, cash: float = 1e4):
+    def __init__(self, it, cash: float = 10**3, assets: int = 0, softlimit: int = 100):
         super().__init__(it)
         self.cash = cash
+        self.assets = assets
+        self.softlimit = softlimit
 
     def __repr__(self):
-        return f'MarketMaker In (it={self.it}, cash={self.cash})'
+        return f'MarketMaker In (it={self.it}, softlimit={self.softlimit})'
 
     def call(self, it: int):
         if super().call(it):
             return
 
-        maker = MarketMaker(self.simulator.exchange, self.cash)
+        maker = MarketMaker(self.simulator.exchange, self.cash, self.assets, self.softlimit)
         self.simulator.traders.append(maker)
 
 

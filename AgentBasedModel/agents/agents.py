@@ -43,8 +43,8 @@ class ExchangeAgent:
         Fill order book with random orders. Fill dividend book with n future dividends.
         """
         # Order book
-        prices1 = [random.normalvariate(price - std, std) for _ in range(volume // 2)]
-        prices2 = [random.normalvariate(price + std, std) for _ in range(volume // 2)]
+        prices1 = [round(random.normalvariate(price - std, std), 1) for _ in range(volume // 2)]
+        prices2 = [round(random.normalvariate(price + std, std), 1) for _ in range(volume // 2)]
         quantities = [random.randint(1, 5) for _ in range(volume)]
 
         for (p, q) in zip(sorted(prices1 + prices2), quantities):
@@ -544,12 +544,12 @@ class MarketMaker(Trader):
     spread between bid and ask prices, and maintain its assets to cash ratio in balance.
     """
 
-    def __init__(self, market: ExchangeAgent, cash: float, assets: int = 500, upper_limit: float = 900,
-                 lower_limit: float = 100):
+    def __init__(self, market: ExchangeAgent, cash: float, assets: int = 0, softlimit: int = 100):
         super().__init__(market, cash, assets)
         self.type = 'Market Maker'
-        self.ul = upper_limit
-        self.ll = lower_limit
+        self.softlimit = softlimit
+        self.ul = softlimit
+        self.ll = -softlimit
         self.panic = False
 
     def call(self):
@@ -558,18 +558,18 @@ class MarketMaker(Trader):
             self._cancel_order(order)
 
         spread = self.market.spread()
-        price = self.market.price()
 
         # Calculate bid and ask volume
-        bid_volume = round(max(0., (self.ul - 1 - self.assets) / 2))
-        ask_volume = round(max(0., (self.assets - self.ll - 1) / 2))
+        bid_volume = max(0., self.ul - 1 - self.assets)
+        ask_volume = max(0., self.assets - self.ll - 1)
 
         # If in panic state we only either sell or buy commodities
         if not bid_volume or not ask_volume:
             self.panic = True
+            self._buy_market((self.ul + self.ll) / 2 - self.assets) if ask_volume is None else None
+            self._sell_market(self.assets - (self.ul + self.ll) / 2) if bid_volume is None else None
         else:
             self.panic = False
-
-        base_offset = min((spread['ask'] - spread['bid']) * (self.assets / self.ul), 1)  # Price offset
-        self._buy_limit(bid_volume, price - base_offset)  # BID
-        self._sell_limit(ask_volume, price + base_offset)  # ASK
+            base_offset = -((spread['ask'] - spread['bid']) * (self.assets / self.softlimit))  # Price offset
+            self._buy_limit(bid_volume, spread['bid'] - base_offset - .1)  # BID
+            self._sell_limit(ask_volume, spread['ask'] + base_offset + .1)  # ASK
