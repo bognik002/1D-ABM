@@ -8,12 +8,12 @@ def plot_price(info: SimulatorInfo, spread=False, rolling: int = 1, figsize=(6, 
     plt.title('Stock Price') if rolling == 1 else plt.title(f'Stock Price (MA {rolling})')
     plt.xlabel('Iterations')
     plt.ylabel('Price')
-    plt.plot(range(rolling, len(info.prices)), math.rolling(info.prices, rolling), color='black')
+    plt.plot(range(rolling - 1, len(info.prices)), math.rolling(info.prices, rolling), color='black')
     if spread:
         v1 = [el['bid'] for el in info.spreads]
         v2 = [el['ask'] for el in info.spreads]
-        plt.plot(range(rolling, len(v1)), math.rolling(v1, rolling), label='bid', color='green')
-        plt.plot(range(rolling, len(v2)), math.rolling(v2, rolling), label='ask', color='red')
+        plt.plot(range(rolling - 1, len(v1)), math.rolling(v1, rolling), label='bid', color='green')
+        plt.plot(range(rolling - 1, len(v2)), math.rolling(v2, rolling), label='ask', color='red')
     plt.show()
 
 

@@ -8,11 +8,15 @@ class Event:
         self.it = it  # Activation it
         self.simulator = None
 
+    def __repr__(self):
+        return f'Empty (it={self.it})'
+
     def call(self, it: int):
         if self.simulator is None:
             raise Exception('No simulator link found')
         if it != self.it:
             return True
+        return False
 
     def link(self, simulator: Simulator):
         self.simulator = simulator

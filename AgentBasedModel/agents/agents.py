@@ -426,7 +426,7 @@ class Chartist(Trader):
                 if self.orders:
                     self._cancel_order(self.orders[-1])
 
-    def change_sentiment(self, info, a1=1, a2=1, v1=1):
+    def change_sentiment(self, info, a1=1, a2=1, v1=.1):
         """
         Change sentiment
 
