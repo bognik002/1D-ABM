@@ -92,3 +92,12 @@ def plot_volatility_return(info: SimulatorInfo, window: int = 5, figsize=(6, 6))
     volatility = info.return_volatility(window)
     plt.plot(range(window, len(volatility) + window), volatility, color='black')
     plt.show()
+
+
+def plot_liquidity(info: SimulatorInfo, rolling: int = 1, figsize=(6, 6)):
+    plt.figure(figsize=figsize)
+    plt.title('Liquidity') if rolling == 1 else plt.title(f'Liquidity (MA {rolling})')
+    plt.xlabel('Iterations')
+    plt.ylabel('Spread / avg. Price')
+    plt.plot(info.liquidity(rolling), color='black')
+    plt.show()

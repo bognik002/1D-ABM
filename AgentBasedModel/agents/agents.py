@@ -403,13 +403,15 @@ class Chartist(Trader):
         """
         random_state = random.random()
         t_cost = self.market.transaction_cost
+        spread = self.market.spread()
+
         if self.sentiment == 'Optimistic':
             # Market order
             if random_state > .85:
                 self._buy_market(Random.draw_quantity())
             # Limit order
             elif random_state > .5:
-                self._buy_limit(Random.draw_quantity(), (self.market.price() - Random.draw_delta()) * (1 - t_cost))
+                self._buy_limit(Random.draw_quantity(), Random.draw_price('bid', spread) * (1 - t_cost))
             # Cancel order
             elif random_state < .35:
                 if self.orders:
@@ -420,7 +422,7 @@ class Chartist(Trader):
                 self._sell_market(Random.draw_quantity())
             # Limit order
             elif random_state > .5:
-                self._sell_limit(Random.draw_quantity(), (self.market.price() + Random.draw_delta()) * (1 + t_cost))
+                self._sell_limit(Random.draw_quantity(), Random.draw_price('ask', spread) * (1 + t_cost))
             # Cancel order
             elif random_state < .35:
                 if self.orders:
