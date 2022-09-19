@@ -17,9 +17,9 @@ def aggToShock(sim: Simulator, window: int, funcs: list) -> dict:
     return {str(event): {f_name: {
         'start': f(sim.info, window)[0],
         'before': f(sim.info, window)[:event.it - window] if event.it - window > 0 else [],
-        'right before': f(sim.info, window)[event.it - window - 1] if event.it - window - 1 >= 0 else [],
-        'after': f(sim.info, window)[event.it - window:],
-        'right after': f(sim.info, window)[event.it - window],
+        'right before': f(sim.info, window)[event.it - window] if event.it - window - 1 >= 0 else [],
+        'after': f(sim.info, window)[event.it - window + 1:],
+        'right after': f(sim.info, window)[event.it - window + 1],
         'end': f(sim.info, window)[-1]
     } for f_name, f in funcs} for event in sim.events}
 

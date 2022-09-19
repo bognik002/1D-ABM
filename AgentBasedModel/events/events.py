@@ -1,6 +1,7 @@
 from AgentBasedModel.simulator import Simulator
 from AgentBasedModel.agents import Trader, Universalist, Fundamentalist, MarketMaker
 from AgentBasedModel.utils.orders import Order
+from itertools import chain
 
 
 class Event:
@@ -9,7 +10,7 @@ class Event:
         self.simulator = None
 
     def __repr__(self):
-        return f'Empty (it={self.it})'
+        return f'empty (it={self.it})'
 
     def call(self, it: int):
         if self.simulator is None:
@@ -29,7 +30,7 @@ class FundamentalPriceShock(Event):
         self.dp = price_change
 
     def __repr__(self):
-        return f'Fundamental Price shock (it={self.it}, dp={self.dp})'
+        return f'fundamental price shock (it={self.it}, dp={self.dp})'
 
     def call(self, it: int):
         if super().call(it):
@@ -41,22 +42,39 @@ class FundamentalPriceShock(Event):
 
 
 class MarketPriceShock(Event):
-    def __init__(self, it: int, volume_change: float):
+    def __init__(self, it: int, price_change: float):
         super().__init__(it)
-        self.volume = round(volume_change)
+        self.dp = round(price_change)
 
     def __repr__(self):
-        return f'Market Price shock (it={self.it}, dp={self.volume})'
+        return f'market price shock (it={self.it}, dp={self.dp})'
+
+    def call(self, it: int):
+        if super().call(it):
+            return
+
+        book = self.simulator.exchange.order_book
+        for order in chain(*book.values()):
+            order.price += round(self.dp, 1)
+
+
+class LiquidityShock(Event):
+    def __init__(self, it: int, volume_change: float):
+        super().__init__(it)
+        self.dv = round(volume_change)
+
+    def __repr__(self):
+        return f'liquidity shock (it={self.it}, dv={self.dv})'
 
     def call(self, it: int):
         if super().call(it):
             return
         exchange = self.simulator.exchange
         pseudo_trader = Trader(exchange, 1e6, int(1e4))
-        if self.volume < 0:  # buy
-            order = Order(exchange.order_book['ask'].last.price, abs(self.volume), 'bid', pseudo_trader)
+        if self.dv < 0:  # buy
+            order = Order(exchange.order_book['ask'].last.price, abs(self.dv), 'bid', pseudo_trader)
         else:  # sell
-            order = Order(exchange.order_book['bid'].last.price, abs(self.volume), 'ask', pseudo_trader)
+            order = Order(exchange.order_book['bid'].last.price, abs(self.dv), 'ask', pseudo_trader)
         exchange.market_order(order)
 
 
@@ -66,7 +84,7 @@ class InformationShock(Event):
         self.access = access
 
     def __repr__(self):
-        return f'Information shock (it={self.it}, access={self.access})'
+        return f'information shock (it={self.it}, access={self.access})'
 
     def call(self, it: int):
         if super().call(it):
@@ -84,7 +102,7 @@ class MarketMakerIn(Event):
         self.softlimit = softlimit
 
     def __repr__(self):
-        return f'MarketMaker In (it={self.it}, softlimit={self.softlimit})'
+        return f'mm in (it={self.it}, softlimit={self.softlimit})'
 
     def call(self, it: int):
         if super().call(it):
@@ -99,7 +117,7 @@ class MarketMakerOut(Event):
         super().__init__(it)
 
     def __repr__(self):
-        return f'MarketMaker Out (it={self.it})'
+        return f'mm out (it={self.it})'
 
     def call(self, it: int):
         if super().call(it):
@@ -114,7 +132,7 @@ class TransactionCost(Event):
         self.cost = cost
 
     def __repr__(self):
-        return f'Transaction cost (it={self.it}, cost={self.cost}%)'
+        return f'transaction cost (it={self.it}, cost={self.cost}%)'
 
     def call(self, it: int):
         if super().call(it):

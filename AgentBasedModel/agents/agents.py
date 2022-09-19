@@ -515,26 +515,26 @@ class Universalist(Fundamentalist, Chartist):
             Chartist.change_sentiment(self, info, a1, a2, v1)
 
         # Change strategy
-        U1 = a3 * ((r + 1 / v2 * dp) / p - R - s * abs((pf - p) / p))
-        U2 = a3 * (R - (r + 1 / v2 * dp) / p - s * abs((pf - p) / p))
+        U1 = max(-100, min(100, a3 * ((r + 1 / v2 * dp) / p - R - s * abs((pf - p) / p))))
+        U2 = max(-100, min(100, a3 * (R - (r + 1 / v2 * dp) / p - s * abs((pf - p) / p))))
 
         if self.type == 'Chartist':
             if self.sentiment == 'Optimistic':
-                prob = v2 * n_optimistic / n_traders * exp(U1)
+                prob = v2 * n_optimistic / (n_traders * exp(U1))
                 if prob > random.random():
                     self.type = 'Fundamentalist'
             elif self.sentiment == 'Pessimistic':
-                prob = v2 * n_pessimists / n_traders * exp(U2)
+                prob = v2 * n_pessimists / (n_traders * exp(U2))
                 if prob > random.random():
                     self.type = 'Fundamentalist'
 
         elif self.type == 'Fundamentalist':
-            prob = v2 * n_fundamentalists / n_traders * exp(-U1)
+            prob = v2 * n_fundamentalists / (n_traders * exp(-U1))
             if prob > random.random() and self.sentiment == 'Pessimistic':
                 self.type = 'Chartist'
                 self.sentiment = 'Optimistic'
 
-            prob = v2 * n_fundamentalists / n_traders * exp(-U2)
+            prob = v2 * n_fundamentalists / (n_traders * exp(-U2))
             if prob > random.random() and self.sentiment == 'Optimistic':
                 self.type = 'Chartist'
                 self.sentiment = 'Pessimistic'
